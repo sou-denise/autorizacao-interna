@@ -1,1 +1,38 @@
-probe
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.tanstack/**
+.nitro
+*.local
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Imagens restauradas a partir de assets/*.b64 (ver scripts/restore-assets.mjs).
+# Os originais versionados ficam em assets/*.b64.
+src/assets/*.webp
+public/images/*.png
+public/favicon.ico
