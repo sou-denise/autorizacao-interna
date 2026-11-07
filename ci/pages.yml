@@ -1,0 +1,85 @@
+name: Publicar AUTORIZAÇÃO INTERNA no GitHub Pages
+
+# ---------------------------------------------------------------------------
+# COMO ATIVAR
+#
+# 1. Copie este arquivo para `.github/workflows/pages.yml` (na raiz do
+#    repositório, dentro da pasta `.github/workflows/`).
+#    O caminho é exigido pelo GitHub Actions — este arquivo vive em `ci/`
+#    apenas porque a automação usada na publicação não grava diretamente
+#    dentro de `.github/workflows/`.
+#
+# 2. Em Settings → Pages → Build and deployment → Source, escolha
+#    "GitHub Actions". (O GitHub exige essa configuração manual porque o
+#    token do Actions não tem permissão para criar o site do Pages.)
+#
+# A partir daí, todo push em `main` constrói o site e publica em
+# https://sou-denise.github.io/autorizacao-interna/
+# ---------------------------------------------------------------------------
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build do site estático
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.4"
+
+      - name: Instalar dependências
+        run: bun install --frozen-lockfile
+
+      - name: Restaurar imagens do projeto
+        run: node scripts/restore-assets.mjs
+
+      - name: Testes
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+
+      - name: Verificar saída estática
+        run: |
+          test -f dist/client/index.html || { echo "::error::dist/client/index.html não encontrado"; exit 1; }
+          echo "Arquivos gerados:" && ls -la dist/client
+
+      - name: Página 404 do GitHub Pages
+        run: cp dist/client/index.html dist/client/404.html
+
+      - name: Upload do artefato do Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/client
+
+  deploy:
+    name: Publicação
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

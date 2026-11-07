@@ -54,12 +54,28 @@ bun run build   # gera o site estático em dist/client
 ```
 
 O build gera HTML estático (prerender) em `dist/client`, pronto para o
-GitHub Pages. O workflow `.github/workflows/pages.yml` faz o build no CI e
-publica em https://sou-denise.github.io/autorizacao-interna/.
-
-O site é servido no subcaminho `/autorizacao-interna/`, por isso o `base` do
-Vite e o `basepath` do TanStack Router estão fixados nesse prefixo
+GitHub Pages. O site é servido no subcaminho `/autorizacao-interna/`, por isso
+o `base` do Vite e o `basepath` do TanStack Router estão fixados nesse prefixo
 (`vite.config.ts` e `src/router.tsx`).
+
+### Publicar no GitHub Pages
+
+O workflow de publicação está em [`ci/pages.yml`](ci/pages.yml). Para colocá-lo
+em funcionamento são **dois passos manuais** (ambos feitos uma única vez):
+
+1. **Copie `ci/pages.yml` para `.github/workflows/pages.yml`.**
+   O GitHub Actions só lê workflows nesse caminho exato. A cópia pode ser feita
+   pela interface do GitHub: *Add file → Create new file*, nomeando o arquivo
+   `.github/workflows/pages.yml`, e colando o conteúdo de `ci/pages.yml`.
+
+2. **Ative o Pages:** em *Settings → Pages → Build and deployment → Source*,
+   escolha **GitHub Actions**.
+   O GitHub exige essa configuração manual porque o token do próprio Actions
+   não tem permissão para criar o site do Pages.
+
+Depois disso, todo push em `main` constrói o site e publica em
+<https://sou-denise.github.io/autorizacao-interna/>. O workflow também pode ser
+disparado manualmente pela aba *Actions*.
 
 ## Imagens
 
